@@ -1,4 +1,4 @@
-name: Trigger ADO Build Pipeline
+name: Trigger Build Pipeline
 
 on:
   push:
