@@ -14,7 +14,7 @@ namespace OctopusSamples.ShoppingCartService
     {
         public static void Main(string[] args)
         {
-            //CreateWebHostBuilder(args).Build().Run(true);
+            //CreateWebHostBuilder(args).Build().Run(false);
             CreateWebHostBuilder(args).Build().Run();
 
         }
