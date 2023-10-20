@@ -128,7 +128,7 @@ jobs:
        release_number: ${{ steps.create-release.outputs.release_number }}
 
   Create-Octopus-Release-Tenant:
-  
+      if: false
       name: Create Octopus Release - Tenant 🐙
       needs: [build, Push-build-information]
       runs-on: ubuntu-latest
