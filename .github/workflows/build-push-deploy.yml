@@ -102,14 +102,12 @@ jobs:
         OCTOPUS_SPACE: K8S-Deployment
           
       steps:
-        - name: Deploy the release in Octopus Deploy
+        - name: Deploy Octopus Release
           uses: OctopusDeploy/deploy-release-action@v3
           with:
-               api_key: ${{ secrets.OCTOPUS_SERVER_URL }}
-               server: ${{ secrets.OCTOPUS_API_KEY }}
-               project: Octo-Pet-Shop
-               release_number: "${{ needs.build.outputs.version }}"
-               environments: |
+              project: Octo-Pet-Shop
+              release_number: ${{ needs.build.outputs.version }}
+              environments: |
                  development
 
         
