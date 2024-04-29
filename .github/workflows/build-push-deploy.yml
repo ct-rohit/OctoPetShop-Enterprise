@@ -58,7 +58,7 @@ jobs:
           OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
           OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
           overwrite_mode: OverwriteExisting
-          packages: "octo-pet-shop.${{ steps.version-generator.outputs.version }}.tgz"
+          packages: "octo-pet-shop.${{ needs.build.outputs.version }}.tgz"
   
   Push-build-information:
        
@@ -97,4 +97,4 @@ jobs:
         with:
           project: "Octo-Pet-Shop"
       outputs: 
-       release_number: ${{ steps.create-release.outputs.release_number }}
+       release_number: ${{ needs.build.outputs.version }}
