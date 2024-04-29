@@ -1,0 +1,76 @@
+name: build-push-deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    
+    name: Build & Push Docker Imagess
+    runs-on: ubuntu-latest
+    
+    outputs:
+      version: ${{ steps.version-generator.outputs.version }}
+      
+    steps:
+    
+     - uses: actions/checkout@v3
+    
+     - name: Login to DockerHub
+       uses: docker/login-action@v2
+       with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        
+     - name: Set Version Number
+
+       id: version-generator
+       run: echo "version=$(date +'%Y.%m.%d').$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
+
+     - name: Build OctoPetShop web container
+       run: |
+        docker build ./OctopusSamples.OctoPetShop.Web --file ./OctopusSamples.OctoPetShop.Web/dockerfile --tag octopussamples/octopetshop-web-enterprise:${{ steps.version-generator.outputs.version }}
+        docker push rohit9211/octopetshop-web-enterprise:${{ steps.version-generator.outputs.version }}
+                
+        
+  Push-build-information:
+       
+      name: Push Build Information
+      needs: build 
+      runs-on: ubuntu-latest
+      
+      env:
+        OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+        OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+        OCTOPUS_SPACE: K8S-Deployment
+      
+
+      steps:
+      - uses: OctopusDeploy/push-build-information-action@v3
+        name: Push Build Information
+        with:
+          version: ${{ needs.build.outputs.version }}
+          packages: |
+            octopussamples/octopetshop-web-enterprise
+          
+  # Create-Octopus-Release:
+  
+  #     name: Create Release
+  #     needs: [build, Push-build-information]
+  #     runs-on: ubuntu-latest
+      
+  #     env:
+  #       OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+  #       OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+  #       OCTOPUS_SPACE: K8S-Deployment
+        
+  #     steps:
+  #     - uses: OctopusDeploy/create-release-action@v3
+  #       id: "create-release"
+  #       with:
+  #         project: "Octo-Pet-Shop"
+  #     outputs: 
+  #      release_number: ${{ steps.create-release.outputs.release_number }}
