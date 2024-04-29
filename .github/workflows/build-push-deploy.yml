@@ -3,12 +3,18 @@ name: build-push-deploy
 on:
   workflow_dispatch:
 
+env:
+  OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+  OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+  OCTOPUS_SPACE: K8S-Deployment
+
 jobs:
 
   build:
     
     name: Build & Push Docker Imagess
     runs-on: ubuntu-latest
+
     
     outputs:
       version: ${{ steps.version-generator.outputs.version }}
