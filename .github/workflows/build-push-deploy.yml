@@ -26,7 +26,7 @@ jobs:
      - name: Set Version Number
 
        id: version-generator
-       run: echo "version=$(date +'%Y.%m.%d').$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
+       run: echo "version=$(date +'%Y.%m.%d')-$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
 
      - name: Build OctoPetShop web container
        run: |
@@ -53,6 +53,7 @@ jobs:
 
       steps:
       - uses: OctopusDeploy/push-package-action@v3
+        name: Push Build Octopus
         with:
           OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
           OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
@@ -62,7 +63,7 @@ jobs:
   Push-build-information:
        
       name: Push Build Information
-      needs: build 
+      needs: [build, Push-build-Octopus]
       runs-on: ubuntu-latest
               
       env:
