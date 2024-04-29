@@ -32,11 +32,16 @@ jobs:
        run: |
         docker build ./OctopusSamples.OctoPetShop.Web --file ./OctopusSamples.OctoPetShop.Web/dockerfile --tag rohit9211/octopetshop-web-enterprise:${{ steps.version-generator.outputs.version }}
         docker push rohit9211/octopetshop-web-enterprise:${{ steps.version-generator.outputs.version }}
+      
+     - name: Package App
+       run: |- 
+        helm package octo-pet-shop --version=${{ steps.version-generator.outputs.version }} --app-version=${{ steps.version-generator.outputs.version }}
+        mv octo-pet-shop-${{ steps.version-generator.outputs.version }}.tgz octo-pet-shop.${{ steps.version-generator.outputs.version }}.tgz
                 
         
-  Push-build-information:
+  Push-build-Octopus:
        
-      name: Push Build Information
+      name: Push Build Octopus
       needs: build 
       runs-on: ubuntu-latest
       
@@ -47,28 +52,48 @@ jobs:
       
 
       steps:
+      - uses: OctopusDeploy/push-package-action@v3
+        with:
+          OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+          OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+          overwrite_mode: OverwriteExisting
+          packages: "octo-pet-shop.${{ steps.version-generator.outputs.version }}.tgz"
+  
+  Push-build-information:
+       
+      name: Push Build Information
+      needs: build 
+      runs-on: ubuntu-latest
+              
+      env:
+          OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+          OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+          OCTOPUS_SPACE: K8S-Deployment
+              
+        
+      steps:
       - uses: OctopusDeploy/push-build-information-action@v3
         name: Push Build Information
         with:
           version: ${{ needs.build.outputs.version }}
           packages: |
-            octopussamples/octopetshop-web-enterprise
+            rohit9211/octopetshop-web-enterprise
           
-  # Create-Octopus-Release:
+  Create-Octopus-Release:
   
-  #     name: Create Release
-  #     needs: [build, Push-build-information]
-  #     runs-on: ubuntu-latest
+      name: Create Release
+      needs: [build, Push-build-Octopus, Push-build-information]
+      runs-on: ubuntu-latest
       
-  #     env:
-  #       OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
-  #       OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
-  #       OCTOPUS_SPACE: K8S-Deployment
+      env:
+        OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+        OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+        OCTOPUS_SPACE: K8S-Deployment
         
-  #     steps:
-  #     - uses: OctopusDeploy/create-release-action@v3
-  #       id: "create-release"
-  #       with:
-  #         project: "Octo-Pet-Shop"
-  #     outputs: 
-  #      release_number: ${{ steps.create-release.outputs.release_number }}
+      steps:
+      - uses: OctopusDeploy/create-release-action@v3
+        id: "create-release"
+        with:
+          project: "Octo-Pet-Shop"
+      outputs: 
+       release_number: ${{ steps.create-release.outputs.release_number }}
