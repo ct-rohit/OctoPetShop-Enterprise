@@ -33,12 +33,7 @@ jobs:
         docker build ./OctopusSamples.OctoPetShop.Web --file ./OctopusSamples.OctoPetShop.Web/dockerfile --tag rohit9211/octopetshop-web-enterprise:${{ steps.version-generator.outputs.version }}
         docker push rohit9211/octopetshop-web-enterprise:${{ steps.version-generator.outputs.version }}
       
-     - name: Package App
-       run: |- 
-        helm package octo-pet-shop --version=${{ steps.version-generator.outputs.version }} --app-version=${{ steps.version-generator.outputs.version }}
-        mv octo-pet-shop-${{ steps.version-generator.outputs.version }}.tgz octo-pet-shop.${{ steps.version-generator.outputs.version }}.tgz
-                
-        
+                   
   Push-build-Octopus:
        
       name: Push Build Octopus
@@ -52,11 +47,14 @@ jobs:
       
 
       steps:
+      - name: Package App
+        run: |- 
+         helm package octo-pet-shop --version=${{ needs.build.outputs.version }} --app-version=${{ needs.build.outputs.version }}
+         mv octo-pet-shop-${{ needs.build.outputs.version }}.tgz octo-pet-shop.${{ needs.build.outputs.version }}.tgz
+      
       - uses: OctopusDeploy/push-package-action@v3
         name: Push Build Octopus
         with:
-          OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
-          OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
           overwrite_mode: OverwriteExisting
           packages: "octo-pet-shop.${{ needs.build.outputs.version }}.tgz"
   
