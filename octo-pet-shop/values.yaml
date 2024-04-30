@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+image:
+  tag: "#{Octopus.Action.Package.PackageVersion}"
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

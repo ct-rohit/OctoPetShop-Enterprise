@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: rohit9211/octopetshop-web-enterprise
+          image: rohit9211/octopetshop-web-enterprise:{{ .Values.image.tag }}
           #image: octopetshop_octopetshop # use these when building locally
           #imagePullPolicy: Never
           ports:
